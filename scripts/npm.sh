@@ -12,10 +12,7 @@ echo "Downloading..."
 cd $BUILD_PATH
 
 mkdir -p nvm && cd nvm
-#TODO: Add back after testing
-#curl -v "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh" &>$LOG_FILE
-
-echo "DUMMY INSTALL" &>$LOG_FILE
+wget -v "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh" &>$LOG_FILE
 if [ ! $? -eq 0 ]; then
   echo "Failed to download nvm" >&2
   exit 1
