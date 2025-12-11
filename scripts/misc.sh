@@ -4,49 +4,37 @@ source ./config.env
 
 LOG_FILE=$(realpath $LOG_PATH/misc.log)
 
+function install() {
+
+  local NAME=$1
+  local CMD=$2
+
+  echo "Installing ${NAME}..."
+  #${CMD} &>"$LOG_FILE"
+
+  if $CMD &>>"$LOG_FILE"; then
+    echo "  Successfully installed ${NAME}"
+  else
+    echo "  Failed to install ${NAME}!"
+  fi
+
+}
+
 echo "-------------------"
 echo "Building Misc Tools"
 echo "-------------------"
 
-echo 'Installing fd-find'
-npm install -g fd-find &>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to install fd-find" >&2
-  exit 1
-fi
+echo "" >"$LOG_FILE"
 
-echo 'Installing lazygit'
-go install github.com/jesseduffield/lazygit@latest &>>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to install lazygit" >&2
-  exit 1
-fi
+install "fd-find" "npm install -g fd-find"
 
-echo 'Installing ripgrep'
-cargo install ripgrep &>>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to install ripgrep" >&2
-  exit 1
-fi
+install "lazygit" "go install github.com/jesseduffield/lazygit@latest"
 
-echo 'Installing ast-grep'
-cargo install ast-grep &>>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to install ast-grep" >&2
-  exit 1
-fi
+install "bat" "cargo install bat"
+install "eza" "cargo install eza"
+install "ripgrep" "cargo install ripgrep"
+install "ast-grep" "cargo install ast-grep"
+install "tectonic" "cargo install tectonic"
 
-echo 'Installing tectonic'
-cargo install tectonic &>>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to install tectonic" >&2
-  exit 1
-fi
-
-echo 'Installing fzf'
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf &>>"$LOG_FILE"
-~/.fzf/install &>>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to install fzf" >&2
-  exit 1
-fi
+CMD="git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && ~/.fzf/install"
+install "fzf" "$CMD"
