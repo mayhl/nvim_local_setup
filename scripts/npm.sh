@@ -1,42 +1,21 @@
 #!/usr/bin/env bash
 
-source ./config.env
+source "$(dirname "$0")/config.env"
+setup_logging
+log_header "NPM"
+
 VERSION=24
-LOG_FILE=$(realpath $LOG_PATH/npm.log)
 
-echo "------------"
-echo "Building npm"
-echo "------------"
+# Use shared NVM_DIR
+export NVM_DIR="$INSTALL_ROOT/nvm"
+mkdir -p "$NVM_DIR"
 
-echo "Downloading..."
-cd $BUILD_PATH
+cd "$BUILD_PATH" || exit 1
 
-mkdir -p nvm && cd nvm
-wget -v "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh" &>$LOG_FILE
-if [ ! $? -eq 0 ]; then
-  echo "Failed to download nvm" >&2
-  exit 1
-fi
+mkdir -p nvm_installer && cd nvm_installer || exit 1
+run_and_log "Downloading nvm installer" wget -v "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh" || exit 1
 
-bash install.sh &>>$LOG_FILE
+run_and_log "Installing nvm" bash install.sh || exit 1
 
-if [ ! $? -eq 0 ]; then
-  echo "Failed to install nvm" >&2
-  exit 1
-fi
-#source envirment
-
-#export NVM_DIR="$HOME/.nvm"
-echo "Installing..."
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-nvm install $VERSION &>>$LOG_FILE
-
-if [ ! $? -eq 0 ]; then
-  echo "Failed to install npm" >&2
-  exit 1
-fi
-#npm i @ast-grep/cli -g
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+run_and_log "Installing node $VERSION" nvm install "$VERSION" || exit 1

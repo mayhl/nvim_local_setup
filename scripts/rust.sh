@@ -1,27 +1,18 @@
-#!/usr/env/bin bash
+#!/usr/bin/env bash
 
-source ./config.env
+source "$(dirname "$0")/config.env"
+setup_logging
+log_header "Rust"
 
-LOG_FILE=$(realpath "$LOG_PATH"/rust.log)
+# Define shared Rust locations
+export RUSTUP_HOME="$INSTALL_ROOT/rust/rustup"
+export CARGO_HOME="$INSTALL_ROOT/rust/cargo"
+mkdir -p "$RUSTUP_HOME" "$CARGO_HOME"
 
-echo "-------------"
-echo "Building rust"
-echo "-------------"
-
-echo "Downloading..."
 cd "$BUILD_PATH" || exit 1
-mkdir -p rust
-cd rust || exit 1
-rm --f install.sh
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o install.sh &>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to download rust" >&2
-  exit 1
-fi
 
-echo "Installing..."
-sh install.sh -y &>>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to install rust" >&2
-  exit 1
-fi
+# Download rustup installer
+run_and_log "Downloading rustup" curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh || exit 1
+
+# Install non-interactively to the custom paths
+run_and_log "Installing rust" sh rustup.sh -y --no-modify-path || exit 1

@@ -1,37 +1,23 @@
 #!/usr/bin/env bash
 
 # REFERENCE: https://www.lua.org/manual/5.4/readme.html
-source ./config.env
+source "$(dirname "$0")/config.env"
+setup_logging
+log_header "Luarocks"
+
 VERSION=3.12.2
-LOG_FILE=$(realpath $LOG_PATH/luarocks.log)
 
-echo "-----------------"
-echo "Building Luarocks"
-echo "-----------------"
-
-echo "Downloading..."
-cd $BUILD_PATH
-wget https://luarocks.org/releases/luarocks-${VERSION}.tar.gz &>$LOG_FILE
-if [ ! $? -eq 0 ]; then
-  echo "Failed to download luarocks tar.gz" &>>2
-  exit 1
-fi
-tar zxpf luarocks-${VERSION}.tar.gz &>>$LOG_FILE
-
-echo "Configuring..."
-
-cd luarocks-${VERSION}
-./configure --with-lua=$INSTALL_PATH --prefix=$INSTALL_PATH &>>$LOG_FILE
-if [ ! $? -eq 0 ]; then
-  echo "Failed to configure luarocks" >&2
+# Check for lua dependency
+if ! command -v lua &> /dev/null; then
+  echo "Error: lua binary not found in PATH. Ensure lua.sh was run successfully." >&2
   exit 1
 fi
 
-echo "Compiling & Installing..."
-(make && make install) &>>$LOG_FILE
-if [ ! $? -eq 0 ]; then
-  echo "Failed to compile and install luarocks tar.gz" >&2
-  exit 1
-fi
-#sudo luarocks install luasocket
-#lua
+cd "$BUILD_PATH" || exit 1
+run_and_log "Downloading Luarocks" wget "https://luarocks.org/releases/luarocks-${VERSION}.tar.gz" || exit 1
+tar zxpf "luarocks-${VERSION}.tar.gz" &>>"$LOG_FILE"
+
+cd "luarocks-${VERSION}" || exit 1
+run_and_log "Configuring Luarocks" ./configure --with-lua="$INSTALL_ROOT" --prefix="$INSTALL_PATH" || exit 1
+
+run_and_log "Compiling & Installing Luarocks" make install || exit 1

@@ -1,34 +1,17 @@
 #!/usr/bin/env bash
 
-source ./config.env
+source "$(dirname "$0")/config.env"
+setup_logging
+log_header "Go"
 
 GOROOT_VERSION=1.25.5
-GO_VERSION=1.25.5
-
-LOG_FILE=$(realpath $LOG_PATH/go.log)
-
-echo "-----------"
-echo "Building go"
-echo "-----------"
 
 cd "$BUILD_PATH" || exit 1
-#
-echo "Downloading..."
-rm -f go${GOROOT_VERSION}.linux-amd64.tar.gz
-wget https://go.dev/dl/go${GOROOT_VERSION}.linux-amd64.tar.gz &>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to download" >&2
-  exit 1
-fi
 
-echo "Extracting..."
-tar -C "$INSTALL_PATH" -xzf go${GOROOT_VERSION}.linux-amd64.tar.gz &>>"$LOG_FILE"
-rm -f go${GOROOT_VERSION}.linux-amd64.tar.gz
-#mv "$INSTALL_PATH"/go "$INSTALL_PATH"/goroot
-if [ ! $? -eq 0 ]; then
-  echo "Failed to extract" >&2
-  exit 1
-fi
+run_and_log "Downloading Go" wget "https://go.dev/dl/go${GOROOT_VERSION}.linux-amd64.tar.gz" || exit 1
+
+run_and_log "Extracting Go" tar -C "$INSTALL_PATH" -xzf "go${GOROOT_VERSION}.linux-amd64.tar.gz" || exit 1
+rm -f "go${GOROOT_VERSION}.linux-amd64.tar.gz"
 
 # echo "Downloading main..."
 # rm -rf go &>>"$LOG_FILE"

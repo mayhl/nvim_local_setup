@@ -1,45 +1,20 @@
 #!/usr/bin/env bash
 
 #REFERENCE: https://github.com/astrand/xclip/blob/master/INSTALL
-source ./config.env
+source "$(dirname "$0")/config.env"
+setup_logging
+log_header "xclip"
 
-LOG_FILE=$(realpath $LOG_PATH/xclip.log)
-
-echo "--------------"
-echo "Building xclip"
-echo "--------------"
-
-cd $BUILD_PATH || exit 1
-
-echo "Downloading..."
+cd "$BUILD_PATH" || exit 1
 
 rm -rf xclip
-git clone https://github.com/astrand/xclip.git &>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to download xclip" >&2
-  exit 1
-fi
+run_and_log "Downloading xclip" git clone https://github.com/astrand/xclip.git || exit 1
 
 cd xclip || exit 1
 
-echo "Configuring..."
-autoreconf
-./configure --prefix="$INSTALL_PATH" &>>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to configure" >&2
-  exit 1
-fi
+run_and_log "Configuring xclip" autoreconf
+run_and_log "Configuring xclip" ./configure --prefix="$INSTALL_PATH" || exit 1
 
-echo "Compiling..."
-make &>>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to compile" >&2
-  exit 1
-fi
+run_and_log "Compiling xclip" make || exit 1
 
-echo "Installing..."
-make install &>>"$LOG_FILE"
-if [ ! $? -eq 0 ]; then
-  echo "Failed to install" >&2
-  exit 1
-fi
+run_and_log "Installing xclip" make install || exit 1

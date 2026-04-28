@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
 
-# Centralized installation root for the nvim toolstack
-export STACK_ROOT="${HOME}/opt/nvim_stack"
-export BUILD_PATH="${HOME}/opt/build"
-export LOG_PATH="${HOME}/logs/nvim_install"
+# Use the shared location provided by the environment or default
+export INSTALL_ROOT="${INSTALL_ROOT:-$HOME/opt/nvim_stack}"
+export LOG_PATH="${INSTALL_ROOT}/log"
+export PATH="${INSTALL_ROOT}/bin:$PATH"
 
-mkdir -p "$STACK_ROOT" "$BUILD_PATH" "$LOG_PATH"
+mkdir -p "$INSTALL_ROOT" "$LOG_PATH"
 
-echo "Starting Neovim Toolstack installation into: $STACK_ROOT"
+echo "Starting installation into: $INSTALL_ROOT"
 
-# Run individual build scripts in order of dependency
-# (We assume these scripts are updated to use $STACK_ROOT)
+# Run installation scripts
+./scripts/bob_install.sh
 ./scripts/lua.sh
 ./scripts/luarocks.sh
 ./scripts/go.sh
 ./scripts/npm.sh
 ./scripts/rust.sh
 ./scripts/xclip.sh
-./scripts/nvim.sh
+./scripts/misc.sh
 
 echo "------------------------------------------------"
-echo "Toolstack installation complete."
+echo "Installation complete."
 echo "Add this to your Tcl module file:"
-echo "  prepend-path PATH ${STACK_ROOT}/bin"
-echo "  setenv LUA_PATH '${STACK_ROOT}/share/lua/5.1/?.lua;;'"
+echo "  prepend-path PATH ${INSTALL_ROOT}/bin"
+echo "  prepend-path PATH ${INSTALL_ROOT}/bob/nvim-bin"
 echo "------------------------------------------------"
